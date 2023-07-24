@@ -3,6 +3,7 @@
 #include <linux/if.h>
 #include <linux/if_arp.h>
 #include <linux/if_tun.h>
+#include <spdlog/spdlog.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h> /* For open(), creat() */
@@ -10,7 +11,6 @@
 #include <cstdint>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -41,7 +41,7 @@ void TunTapInterface::alloc() {
   }
 
   if ((err = ioctl(fd_, TUNSETIFF, (void*)&ifr)) < 0) {
-    std::cout << "ioctl failed: " << err << std::endl;
+    spdlog::error("ioctl failed: {}", err);
     close();
     throw(std::runtime_error("ioctl failed"));
   }

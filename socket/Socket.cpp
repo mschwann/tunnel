@@ -1,12 +1,23 @@
 #include "Socket.h"
 
+#include <atomic>
+#include <thread>
+
+#include "spdlog/spdlog.h"
+
 Socket::Socket(std::unique_ptr<boost::asio::ip::tcp::socket> socket,
                SocketInterface& interface)
     : socket_(std::move(socket)), buf_(1024), interface_(interface) {}
 
 void Socket::close(const boost::system::error_code& ec) {
-  if (!stopped_) {
-    stopped_ = true;
+  bool localStopped = stopped_.load(std::memory_order_acquire);
+  while (!stopped_.compare_exchange_weak(localStopped, true,
+                                         std::memory_order_acquire,
+                                         std::memory_order_release)) {
+    std::this_thread::yield();
+  }
+  if (!localStopped) {
+    spdlog::debug("Socket: Executing stop");
     boost::system::error_code ec;
     socket_->close(ec);
     interface_.onClose(ec);
@@ -27,7 +38,7 @@ void Socket::read() {
 void Socket::handleRead(const boost::system::error_code& ec, size_t n) {
   if (stopped_) return;
   if (ec) {
-    std::cout << "Error on receive." << std::endl;
+    spdlog::warn("Spdlog: Error on receive.");
     close(ec);
     return;
   }
@@ -44,15 +55,14 @@ void Socket::handleRead(const boost::system::error_code& ec, size_t n) {
 void Socket::handleWrite(const boost::system::error_code& ec) {
   if (stopped_) return;
   if (!socket_->is_open()) {
-    std::cout << "Connect timed out\n";
+    spdlog::info("Connection timed out");
     return;
   }
   if (ec) {
-    std::cout << "Connect error: " << ec.message() << "\n";
+    spdlog::info("Connect error: {}", ec.message());
     close(ec);
     return;
   }
-  std::cout << "Write successfull!" << std::endl;
 }
 void Socket::handleConnect(const boost::system::error_code& ec) {
   if (stopped_) {

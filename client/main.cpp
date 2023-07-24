@@ -3,11 +3,11 @@
 
 #include <boost/asio.hpp>
 #include <functional>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 
 #include "Client.h"
+#include "spdlog/spdlog.h"
 
 int main(int argc, char* argv[]) {
   try {
@@ -15,8 +15,9 @@ int main(int argc, char* argv[]) {
     size_t port = 1234;
     auto ip_address_ = boost::asio::ip::address::from_string("127.0.0.1", ec);
     if (ec) {
-      std::cout << "Failed to parse the IP address. Error code = " << ec.value()
-                << ". Message: " << ec.message() << std::endl;
+      spdlog::error(
+          "Failed to parse the IP address. Error code = {}. Message: {}",
+          ec.value(), ec.message());
       throw std::runtime_error("Failed to parse IP address.");
     }
 
@@ -34,7 +35,7 @@ int main(int argc, char* argv[]) {
 
     // std::this_thread::sleep_for(std::chrono::seconds(100));
   } catch (std::exception& e) {
-    std::cerr << "Exception: " << e.what() << "\n";
+    spdlog::error("Exception: {}", e.what());
   }
 
   return 0;

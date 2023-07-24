@@ -1,10 +1,10 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <iostream>
 
 #include "Server.h"
 #include "Socket.h"
 #include "SocketInterface.h"
+#include "spdlog/spdlog.h"
 
 using boost::asio::ip::tcp;
 
@@ -24,7 +24,7 @@ class ServerAcceptor {
   }
 
   void start_accept() {
-    std::cout << "Start accept" << std::endl;
+    spdlog::info("Start accept");
     auto sock = new boost::asio::ip::tcp::socket(io_service_);
     acceptor_.async_accept(*sock,
                            boost::bind(&ServerAcceptor::doAccept, this, sock,
@@ -46,7 +46,7 @@ int main() {
     io_service.run();
 
   } catch (std::exception& e) {
-    std::cerr << "Exception: " << e.what() << "\n";
+    spdlog::error("Exception: {}", e.what());
   }
   return 0;
 }

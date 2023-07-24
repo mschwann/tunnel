@@ -1,7 +1,7 @@
 #pragma once
+#include <atomic>
 #include <boost/asio.hpp>
 #include <functional>
-#include <iostream>
 #include <memory>
 
 #include "SocketInterface.h"
@@ -15,8 +15,10 @@ class Socket : public std::enable_shared_from_this<Socket> {
          SocketInterface& interface);
   ~Socket() = default;
 
-  bool isStopped() { return stopped_; }
-  bool isOpen() { return !stopped_ && socket_->is_open(); }
+  bool isStopped() { return stopped_.load(std::memory_order_acquire); }
+  bool isOpen() {
+    return !stopped_.load(std::memory_order_acquire) && socket_->is_open();
+  }
 
   void close(const boost::system::error_code& ec);
 
@@ -40,6 +42,6 @@ class Socket : public std::enable_shared_from_this<Socket> {
 
   std::unique_ptr<boost::asio::ip::tcp::socket> socket_;
   std::vector<uint8_t> buf_;
-  bool stopped_ = false;
+  std::atomic_bool stopped_ = false;
   SocketInterface& interface_;
 };

@@ -1,10 +1,10 @@
 #include <linux/if_tun.h>
+#include <spdlog/spdlog.h>
 
 #include <atomic>
 #include <csignal>
 #include <cstring>
 #include <functional>
-#include <iostream>
 #include <thread>
 
 #include "tuntap_interface.h"
@@ -31,14 +31,14 @@ int main() {
   tun.setIp("172.16.0.2");
   tun.setNetmask("255.255.0.0");
   tun.bringUp(true);
-  std::cout << "MAC:" << tun.getMAC() << std::endl;
-  std::cout << "IP:" << tun.getIp() << std::endl;
-  std::cout << "Netmask" << tun.getNetmask() << std::endl;
-  std::cout << "MTU:" << tun.getMtu() << std::endl;
-  std::cout << "UP:" << tun.isUp() << std::endl;
+  spdlog::info("MAC:{}", tun.getMAC());
+  spdlog::info("IP:{}", tun.getIp());
+  spdlog::info("Netmask:{}", tun.getNetmask());
+  spdlog::info("MTU: {}", tun.getMtu());
+  spdlog::info("UP: {}", tun.isUp());
 
   shutdown_handler = [&](int signal) {
-    std::cout << "TunTap shutdown...\n";
+    spdlog::info("TunTap shutdown");
     isShutdown.store(true, std::memory_order_release);
   };
 
@@ -50,14 +50,14 @@ int main() {
     if (nread == 0)  // Timeout from select occured.
       continue;
     if (nread < 0) {
-      std::cout << "Error reading from interface" << std::endl;
+      spdlog::error("Error reading from interface");
       tun.close();
     }
-    printf("Read %ld bytes \n", nread);
+    spdlog::info("Read {} bytes", nread);
   }
 
   tun.bringUp(false);
-  std::cout << "UP:" << tun.isUp() << std::endl;
+  spdlog::info("UP: {}", tun.isUp());
 
   return 0;
 }
