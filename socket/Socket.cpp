@@ -4,12 +4,12 @@ Socket::Socket(std::unique_ptr<boost::asio::ip::tcp::socket> socket,
                SocketInterface& interface)
     : socket_(std::move(socket)), buf_(1024), interface_(interface) {}
 
-void Socket::stop(const boost::system::error_code& ec) {
+void Socket::close(const boost::system::error_code& ec) {
   if (!stopped_) {
     stopped_ = true;
-    interface_.onClose(ec);
     boost::system::error_code ec;
     socket_->close(ec);
+    interface_.onClose(ec);
   }
 }
 
@@ -28,7 +28,7 @@ void Socket::handleRead(const boost::system::error_code& ec, size_t n) {
   if (stopped_) return;
   if (ec) {
     std::cout << "Error on receive." << std::endl;
-    stop(ec);
+    close(ec);
     return;
   }
   if (n) {
@@ -49,8 +49,19 @@ void Socket::handleWrite(const boost::system::error_code& ec) {
   }
   if (ec) {
     std::cout << "Connect error: " << ec.message() << "\n";
-    stop(ec);
+    close(ec);
     return;
   }
   std::cout << "Write successfull!" << std::endl;
+}
+void Socket::handleConnect(const boost::system::error_code& ec) {
+  if (stopped_) {
+    return;
+  }
+  if (ec || !isOpen()) {
+    interface_.onConnectFail(ec);
+    return;
+  }
+  interface_.onConnectSuccess(shared_from_this());
+  read();
 }
