@@ -17,6 +17,7 @@ INCLUDE_DIRECTORIES(
     libs/libviface/include/
     build/include
     socket/include
+    tuntap/include
 )
 LINK_DIRECTORIES(
     build/libviface/src
@@ -27,6 +28,7 @@ LINK_DIRECTORIES(
 set(libviface_VERSION_STRING "1.1.0")
 add_subdirectory(libs/libviface/src)
 
+add_subdirectory (tuntap)
 add_subdirectory (socket)
 add_subdirectory (server)
 add_subdirectory (client)
