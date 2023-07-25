@@ -25,7 +25,7 @@ void tunWorker(TunInterface& tun, std::atomic_bool& isShutdown, Client& c) {
   tun.bringUp(true);
 
   std::vector<uint8_t> buffer(tun.getMtu());
-
+  size_t tunSize = tun.getMtu() * 1024;
   while (!isShutdown.load(std::memory_order_consume)) {
     // try{
     ssize_t nread = tun.read(buffer);
@@ -37,7 +37,7 @@ void tunWorker(TunInterface& tun, std::atomic_bool& isShutdown, Client& c) {
     }
     buffer.resize(nread);
     c.onTunPacket(std::move(buffer));
-    buffer.resize(tun.getMtu());
+    buffer.resize(tunSize);
     spdlog::info("Read {} bytes", nread);
   }
   tun.bringUp(false);

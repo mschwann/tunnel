@@ -49,7 +49,6 @@ void Socket::handleReadHeader(const boost::system::error_code& ec, size_t n,
   }
   if (prev + n == sizeof(packetSize_)) {
     buf_.resize(packetSize_);
-    packet_.reserve(packetSize_);
     socket_->async_read_some(
         boost::asio::mutable_buffer(buf_.data(), buf_.size()),
         std::bind(&Socket::handleRead, this, _1, _2));
@@ -72,6 +71,7 @@ void Socket::handleRead(const boost::system::error_code& ec, size_t n) {
   }
   if (n) {
     if (n == packetSize_) {
+      // Simplest case, we got lucky and got the whole packet.
       interface_.onRead(std::move(buf_));
     } else {
       // This is a fragmented packet, we are doomed.
@@ -79,8 +79,6 @@ void Socket::handleRead(const boost::system::error_code& ec, size_t n) {
           "(Fragmented packet read) beforehand: {} this_packet: {}, expected "
           "total: {}",
           readSize_, n, packetSize_);
-      std::copy(buf_.begin() + readSize_, buf_.begin() + n,
-                std::back_inserter(packet_));
       readSize_ += n;
       if (readSize_ >= packetSize_) {
         interface_.onRead(std::move(buf_));

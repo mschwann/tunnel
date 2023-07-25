@@ -42,7 +42,7 @@ void tunWorker(TunInterface& tun, Server& s) {
   tun.bringUp(true);
 
   std::vector<uint8_t> buffer(tun.getMtu());
-
+  size_t mtuSize = tun.getMtu() * 1024;
   while (1) {
     // try{
     ssize_t nread = tun.read(buffer);
@@ -54,7 +54,7 @@ void tunWorker(TunInterface& tun, Server& s) {
     }
     buffer.resize(nread);
     s.onTunPacket(std::move(buffer));
-    buffer.resize(tun.getMtu());
+    buffer.resize(mtuSize);
   }
   tun.bringUp(false);
 }
