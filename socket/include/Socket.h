@@ -37,7 +37,8 @@ class Socket : public std::enable_shared_from_this<Socket> {
   }
 
  private:
-  void handleReadHeader(const boost::system::error_code& ec, size_t n);
+  void handleReadHeader(const boost::system::error_code& ec, size_t n,
+                        size_t prev);
   void handleRead(const boost::system::error_code& ec, size_t n);
   void handleWrite(const boost::system::error_code& ec);
 

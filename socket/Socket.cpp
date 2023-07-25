@@ -36,25 +36,30 @@ void Socket::write(std::vector<uint8_t> data) {
 void Socket::read() {
   socket_->async_read_some(
       boost::asio::mutable_buffer(&packetSize_, sizeof(packetSize_)),
-      std::bind(&Socket::handleReadHeader, this, _1, _2));
+      std::bind(&Socket::handleReadHeader, this, _1, _2, 0));
 }
 
-void Socket::handleReadHeader(const boost::system::error_code& ec, size_t n) {
+void Socket::handleReadHeader(const boost::system::error_code& ec, size_t n,
+                              size_t prev) {
   if (stopped_) return;
   if (ec) {
     spdlog::warn("Spdlog: Error on receive.");
     close(ec);
     return;
   }
-  if (n == sizeof(packetSize_)) {
+  if (prev + n == sizeof(packetSize_)) {
     buf_.resize(packetSize_);
     packet_.reserve(packetSize_);
     socket_->async_read_some(
         boost::asio::mutable_buffer(buf_.data(), buf_.size()),
         std::bind(&Socket::handleRead, this, _1, _2));
   } else {
-    spdlog::warn("Weird read: {}", n);
-    close(ec);
+    spdlog::warn("Header not read fully: {}", n);
+    socket_->async_read_some(
+        boost::asio::mutable_buffer(
+            reinterpret_cast<char*>(&packetSize_) + n + prev,
+            sizeof(packetSize_) - n - prev),
+        std::bind(&Socket::handleReadHeader, this, _1, _2, n));
   }
 }
 
@@ -70,11 +75,16 @@ void Socket::handleRead(const boost::system::error_code& ec, size_t n) {
       interface_.onRead(std::move(buf_));
     } else {
       // This is a fragmented packet, we are doomed.
-      spdlog::info("(Fragmented packet read)");
-      std::copy(buf_.begin(), buf_.begin() + n, std::back_inserter(packet_));
+      spdlog::info(
+          "(Fragmented packet read) beforehand: {} this_packet: {}, expected "
+          "total: {}",
+          readSize_, n, packetSize_);
+      std::copy(buf_.begin() + readSize_, buf_.begin() + n,
+                std::back_inserter(packet_));
       readSize_ += n;
       if (readSize_ >= packetSize_) {
         interface_.onRead(std::move(buf_));
+        readSize_ = 0;
       } else {
         socket_->async_read_some(
             boost::asio::mutable_buffer(buf_.data() + readSize_,
