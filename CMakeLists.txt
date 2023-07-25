@@ -22,7 +22,6 @@ IF(Boost_FOUND)
 ENDIF(Boost_FOUND)
 
 INCLUDE_DIRECTORIES(
-    libs/libviface/include/
     libs/spdlog/include
     build/include
     socket/include
@@ -33,9 +32,6 @@ LINK_DIRECTORIES(
     build/socket
 )
 
-#submodule - libs/libviface
-set(libviface_VERSION_STRING "1.1.0")
-add_subdirectory(libs/libviface/src)
 add_subdirectory (libs/spdlog)
 
 add_subdirectory (tuntap)

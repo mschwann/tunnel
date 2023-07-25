@@ -1,6 +1,3 @@
-[submodule "libs/libviface"]
-	path = libs/libviface
-	url = git@github.com:HPENetworking/libviface.git
 [submodule "libs/spdlog"]
 	path = libs/spdlog
 	url = git@github.com:gabime/spdlog.git
