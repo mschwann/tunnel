@@ -27,10 +27,11 @@ int main() {
   TunTapInterface tun("tun0", IFF_TUN);
   tun.alloc();
   tun.setPersist(0);
-  tun.setMac("02:23:45:67:89:ab");
+  // tun.setMac("02:23:45:67:89:ab");
   tun.setIp("172.16.0.2");
   tun.setNetmask("255.255.0.0");
   tun.bringUp(true);
+
   spdlog::info("MAC:{}", tun.getMAC());
   spdlog::info("IP:{}", tun.getIp());
   spdlog::info("Netmask:{}", tun.getNetmask());

@@ -118,7 +118,6 @@ void TunTapInterface::setNetmask(const std::string& netMask) {
 }
 
 void TunTapInterface::setMac(const std::string& mac) {
-  if ((flags_ | IFF_TUN) != 1) return;
   struct ifreq ifr;
   readFlags(ifr);
 

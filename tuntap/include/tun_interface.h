@@ -1,6 +1,8 @@
+#pragma once
 #include "tuntap_interface.h"
 
 class TunInterface : private TunTapInterface {
+ public:
   TunInterface(const std::string& name) : TunTapInterface(name, IFF_TUN) {
     alloc();
   }
