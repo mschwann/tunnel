@@ -37,11 +37,15 @@ class Socket : public std::enable_shared_from_this<Socket> {
   }
 
  private:
+  void handleReadHeader(const boost::system::error_code& ec, size_t n);
   void handleRead(const boost::system::error_code& ec, size_t n);
   void handleWrite(const boost::system::error_code& ec);
 
   std::unique_ptr<boost::asio::ip::tcp::socket> socket_;
   std::vector<uint8_t> buf_;
+  std::vector<uint8_t> packet_;
+  size_t packetSize_;
+  size_t readSize_;
   std::atomic_bool stopped_ = false;
   SocketInterface& interface_;
 };
