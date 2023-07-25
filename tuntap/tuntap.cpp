@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iomanip>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -193,8 +194,10 @@ ssize_t TunTapInterface::read(std::vector<uint8_t>& buffer, size_t usec) {
     return 0;  // throw std::runtime_error("Select failed.");
   else if (rv == 0)
     return 0;
-  else
+  else {
+    std::unique_lock lock(m_);
     return ::read(fd_, buffer.data(), buffer.size());
+  }
 }
 
 void TunTapInterface::readFlags(ifreq& ifr) {
@@ -206,6 +209,7 @@ void TunTapInterface::readFlags(ifreq& ifr) {
 }
 
 int TunTapInterface::write(std::vector<uint8_t> buff) {
+  std::unique_lock lock(m_);
   int nwrite;
   if ((nwrite = ::write(fd_, buff.data(), buff.size())) < 0) {
     std::runtime_error("Error writing");

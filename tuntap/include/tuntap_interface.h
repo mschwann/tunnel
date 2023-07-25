@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -37,6 +38,8 @@ class TunTapInterface {
   int flags_;
   int fd_;
   int kernelSocket_;
+
+  std::mutex m_;
 
   void readFlags(ifreq& ifr);
 };

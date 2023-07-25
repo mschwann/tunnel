@@ -55,7 +55,6 @@ void tunWorker(TunInterface& tun, Server& s) {
     buffer.resize(nread);
     s.onTunPacket(std::move(buffer));
     buffer.resize(tun.getMtu());
-    spdlog::info("Read {} bytes", nread);
   }
   tun.bringUp(false);
 }
