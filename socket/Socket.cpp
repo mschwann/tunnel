@@ -1,9 +1,9 @@
 #include "Socket.h"
 
+#include <spdlog/spdlog.h>
+
 #include <atomic>
 #include <thread>
-
-#include "spdlog/spdlog.h"
 
 Socket::Socket(std::unique_ptr<boost::asio::ip::tcp::socket> socket,
                SocketInterface& interface)
