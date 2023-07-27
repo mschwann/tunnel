@@ -1,6 +1,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 
+#include "Config.h"
 #include "Server.h"
 #include "Socket.h"
 #include "SocketInterface.h"
@@ -59,12 +60,14 @@ void tunWorker(TunInterface& tun, Server& s) {
   tun.bringUp(false);
 }
 
-int main() {
-  TunInterface tun("tuns0");
+int main(int argc, char** argv) {
+  Config c(argc, argv);
+
+  TunInterface tun(c.get("name").value_or("tun0"));
   tun.setPersist(0);
   // tun.setMac("02:23:45:67:89:ab");
-  tun.setIp("172.16.0.1");
-  tun.setNetmask("255.255.0.0");
+  tun.setIp(c.get("ip").value_or("172.30.0.1"));
+  tun.setNetmask(c.get("netmask").value_or("255.255.0.0"));
 
   Server srv(tun);
   std::thread t(tunWorker, std::ref(tun), std::ref(srv));

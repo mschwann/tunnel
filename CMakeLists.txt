@@ -26,6 +26,7 @@ INCLUDE_DIRECTORIES(
     build/include
     socket/include
     tuntap/include
+    config/include
 )
 LINK_DIRECTORIES(
     build/libviface/src
