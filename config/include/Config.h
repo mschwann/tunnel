@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <optional>
+#include <sstream>
 #include <string>
 
 class Config {
@@ -19,6 +20,22 @@ class Config {
     auto it = config_.find(key);
     if (it != config_.end()) {
       return it->second;
+    }
+    return std::nullopt;
+  }
+  template <class T>
+  std::optional<T> getAs(const std::string& key) {
+    auto it = config_.find(key);
+    if (it != config_.end()) {
+      try {
+        T val;
+        std::istringstream iss(it->second);
+        iss >> val;
+        if (iss.fail()) return std::nullopt;
+        return val;
+      } catch (...) {
+        return std::nullopt;
+      }
     }
     return std::nullopt;
   }
