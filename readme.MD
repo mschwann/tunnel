@@ -38,5 +38,6 @@ nebula-cert sign -name "pc.neb.zerus.org" -ip "172.16.2.1/16"
 nebula-cert sign -name "lap.neb.zerus.org" -ip "172.16.2.2/16"
 nebula-cert sign -name "work.neb.zerus.org" -ip "172.16.2.3/16"
 #Endpoints
+nebula-cert sign -name "docker.neb.zerus.org" -ip "172.16.4.1/16"
 nebula-cert sign -name "ftp.neb.zerus.org" -ip "172.16.100.1/16"
 ```
